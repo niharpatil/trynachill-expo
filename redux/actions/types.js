@@ -1,0 +1,4 @@
+
+export default {
+  TOGGLE_CHILLER_SELECT : 'TOGGLE_CHILLER_SELECT'
+} 

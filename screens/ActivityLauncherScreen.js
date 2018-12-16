@@ -1,57 +1,104 @@
 import React from 'react';
 import {
-  Image,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   Button,
-  Alert,
   SectionList,
 } from 'react-native';
 import { CheckBox } from 'react-native-elements'
-import { WebBrowser } from 'expo';
+import {connect} from 'react-redux'
 
-import { MonoText } from '../components/StyledText';
+import { toggleChillerSelection, initiateChill } from '../redux/actions/activityActions';
 
-const anon_user_vector="https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fimage.freepik.com%2Ffree-icon%2Fanonymous-avatar-information-button_318-32279.jpg"
-
-const chillerUsersMock = [
-  {image_url: anon_user_vector, name: "John David", userid: 1},
-  {image_url: anon_user_vector, name: "Sanjit Kalapatagod",userid: 2},
-  {image_url: anon_user_vector, name: "Pranav Pillai", userid: 3},
-]
-
-const nonChillerUsersMock = [
-  {image_url: anon_user_vector, name: "Other guy", userid: 1},
-  {image_url: anon_user_vector, name: "Other gal", userid: 2},
-]
-
-export default class ActivityLauncherScreen extends React.Component {
+class ActivityLauncherScreen extends React.Component {
   static navigationOptions = {
     title: 'ActivityLauncher',
   };
   render() {
-    const {navigate} = this.props.navigation;
+    const { navigate } = this.props.navigation;
+    const {
+      chillerUsers
+    } = this.props;
     return (
       <View style={styles.container}>
-        <View style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Text>Jawnbit</Text>
-          </View>
-        </View>
-        <View style={{flex: 1}}>
+        <View style={{ position:'absolute' }}>
           <Button
             onPress={() => navigate('Home')}
             title="Go back"
           />
         </View>
+        <View style={styles.container} contentContainerStyle={styles.contentContainer}>
+          <View style={styles.welcomeContainer}>
+            <Text>Pick your chillers</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <SectionList style={styles.chillersContainer}
+              sections={[
+                { title: 'Chillers', data: this._chillersObjectToList(chillerUsers)},
+              ]}
+              renderItem={({ item }) =>  this._renderCheckbox(item) }
+              renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+              keyExtractor={(item, index) => item.userid}
+            />
+          </View>
+        </View>
+        <View style={styles.container}>
+          <Button 
+            onPress={() => this._launchChillRequest()}
+            title="Send chill request"
+          />
+        </View>
+
       </View>
     );
   }
+
+  _launchChillRequest(){
+    const {
+      chillerUsers
+    } = this.props;
+    let chillerList = this._chillersObjectToList(chillerUsers)
+    chillerList = chillerList.filter(item => item.selected)
+    chillerList = chillerList.map(item => item.userid)
+
+    console.log(chillerList)
+  }
+
+  _chillersObjectToList(chillers){
+    return Object.keys(chillers).map(userid => {
+      return {...chillers[userid], userid}
+    })
+  }
+
+  _renderCheckbox(user){
+    return (
+      <CheckBox 
+        title={user.name}
+        checkedIcon='dot-circle-o'
+        uncheckedIcon='circle-o'
+        checked={user.selected || false}
+        onPress={() => this.props.toggleChillerSelection(user.userid)}
+      />
+    )
+  }
 }
+
+const mapStateToProps = (state) => {
+  const {activity} = state;
+  return {
+    chillerUsers: activity.chillerUsers
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    toggleChillerSelection: userid => dispatch(toggleChillerSelection(userid))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActivityLauncherScreen)
 
 const styles = StyleSheet.create({
   // Custom styles
@@ -82,7 +129,7 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   welcomeContainer: {
-    flex:1,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
@@ -96,7 +143,7 @@ const styles = StyleSheet.create({
     marginLeft: -10,
   },
   getStartedContainer: {
-    flex:1,
+    flex: 1,
     alignItems: 'center',
     marginHorizontal: 50,
   },
