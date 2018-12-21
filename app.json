@@ -23,7 +23,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.trynachill.trynachill"
     }
-  }
+  },
+  "facebookScheme": "fb523726034794635",
+  "facebookAppId": "523726034794635",
+  "facebookDisplayName": "TrynaChill"
 }

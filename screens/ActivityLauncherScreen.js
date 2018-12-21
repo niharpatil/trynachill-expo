@@ -7,7 +7,7 @@ import {
   Button,
   SectionList,
 } from 'react-native';
-import { CheckBox } from 'react-native-elements'
+import { CheckBox, FormInput } from 'react-native-elements'
 import {connect} from 'react-redux'
 
 import { toggleChillerSelection, initiateChill } from '../redux/actions/activityActions';
@@ -63,7 +63,7 @@ class ActivityLauncherScreen extends React.Component {
     chillerList = chillerList.filter(item => item.selected)
     chillerList = chillerList.map(item => item.userid)
 
-    console.log(chillerList)
+    this.props.initiateChill(chillerList)
   }
 
   _chillersObjectToList(chillers){
@@ -94,7 +94,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    toggleChillerSelection: userid => dispatch(toggleChillerSelection(userid))
+    toggleChillerSelection: userid => dispatch(toggleChillerSelection(userid)),
+    initiateChill: (userids) => dispatch(initiateChill(userids))
   }
 }
 

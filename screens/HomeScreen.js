@@ -28,7 +28,34 @@ const nonChillerUsersMock = [
   {image_url: anon_user_vector, name: "Other gal", userid: 2},
 ]
 
+async function logIn() {
+  try {
+    const {
+      type,
+      token,
+      expires,
+      permissions,
+      declinedPermissions,
+    } = await Expo.Facebook.logInWithReadPermissionsAsync('523726034794635', {
+      permissions: ['public_profile'],
+    });
+    if (type === 'success') {
+      // Get the user's name using Facebook's Graph API
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+      Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
+    } else {
+      // type === 'cancel'
+    }
+  } catch ({ message }) {
+    alert(`Facebook Login Error: ${message}`);
+  }
+}
+
 export default class HomeScreen extends React.Component {
+  constructor(props){
+    super(props)
+    logIn()
+  }
   static navigationOptions = {
     header: null,
   };
