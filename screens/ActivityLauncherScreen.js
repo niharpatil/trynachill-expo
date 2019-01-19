@@ -6,46 +6,71 @@ import {
   View,
   Button,
   SectionList,
+  TextInput,
 } from 'react-native';
 import { CheckBox, FormInput } from 'react-native-elements'
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
+import DateTimePicker from 'react-native-modal-datetime-picker'
 
 import { toggleChillerSelection, initiateChill } from '../redux/actions/activityActions';
 
 class ActivityLauncherScreen extends React.Component {
+  state = {
+    isDateTimePickerVisible: false,
+    chillLocation: "",
+    chillTime: null,
+  }
+
   static navigationOptions = {
     title: 'ActivityLauncher',
   };
+
   render() {
     const { navigate } = this.props.navigation;
     const {
       chillerUsers
     } = this.props;
+    const {
+      isDateTimePickerVisible
+    } = this.state;
     return (
       <View style={styles.container}>
-        <View style={{ position:'absolute' }}>
-          <Button
-            onPress={() => navigate('Home')}
-            title="Go back"
-          />
-        </View>
-        <View style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={{ ...styles.container, flex: 7 }} contentContainerStyle={styles.contentContainer}>
           <View style={styles.welcomeContainer}>
             <Text>Pick your chillers</Text>
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 4 }}>
             <SectionList style={styles.chillersContainer}
               sections={[
-                { title: 'Chillers', data: this._chillersObjectToList(chillerUsers)},
+                {
+                  title: 'Who you tryna chill with?',
+                  data: this._chillersObjectToList(chillerUsers),
+                  renderItem: ({ item }) => this._renderCheckbox(item),
+                },
               ]}
-              renderItem={({ item }) =>  this._renderCheckbox(item) }
+              renderItem={({ item }) => this._renderCheckbox(item)}
               renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
               keyExtractor={(item, index) => item.userid}
             />
           </View>
+          <View style={{ flex: 1 }}>
+            <Button title="pick time" onPress={() => this.setState({ isDateTimePickerVisible: true })} />
+            <DateTimePicker
+              isVisible={this.state.isDateTimePickerVisible}
+              onConfirm={this._handleTimePicked}
+              onCancel={() => this.setState({isDateTimePickerVisible: false})}
+              mode="time"
+            />
+            <Text>Where you tryna chill?</Text>
+            <TextInput
+              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+              onChangeText={(chillLocation) => this.setState({ chillLocation })}
+              value={this.state.chillLocation}
+            />
+          </View>
         </View>
         <View style={styles.container}>
-          <Button 
+          <Button
             onPress={() => this._launchChillRequest()}
             title="Send chill request"
           />
@@ -55,38 +80,57 @@ class ActivityLauncherScreen extends React.Component {
     );
   }
 
-  _launchChillRequest(){
+  _launchChillRequest = () => {
+    // Extract user input
     const {
       chillerUsers
     } = this.props;
     let chillerList = this._chillersObjectToList(chillerUsers)
     chillerList = chillerList.filter(item => item.selected)
     chillerList = chillerList.map(item => item.userid)
+    const {
+      chillLocation,
+      chillTime
+    } = this.state;
 
-    this.props.initiateChill(chillerList)
+    // Validate input
+    if (!chillLocation || !chillTime || chillerList.length == 0) {
+      Alert.alert("You're missing some fields...")
+      return
+    }
+
+    // Send chill request to server
+    this.props.initiateChill({chillerList, chillTime, chillLocation})
   }
 
-  _chillersObjectToList(chillers){
+  _chillersObjectToList = (chillers) => {
     return Object.keys(chillers).map(userid => {
-      return {...chillers[userid], userid}
+      return { ...chillers[userid], userid }
     })
   }
 
-  _renderCheckbox(user){
+  _handleTimePicked = (time) => {
+    this.setState({
+      isDateTimePickerVisible: false,
+      chillTime: time,
+    });
+  };
+
+  _renderCheckbox = (item) => {
     return (
-      <CheckBox 
-        title={user.name}
+      <CheckBox
+        title={item.name}
         checkedIcon='dot-circle-o'
         uncheckedIcon='circle-o'
-        checked={user.selected || false}
-        onPress={() => this.props.toggleChillerSelection(user.userid)}
+        checked={item.selected || false}
+        onPress={() => this.props.toggleChillerSelection(item.userid)}
       />
     )
   }
 }
 
 const mapStateToProps = (state) => {
-  const {activity} = state;
+  const { activity } = state;
   return {
     chillerUsers: activity.chillerUsers
   }
@@ -95,7 +139,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     toggleChillerSelection: userid => dispatch(toggleChillerSelection(userid)),
-    initiateChill: (userids) => dispatch(initiateChill(userids))
+    initiateChill: ({chillerList, chillTime, chillLocation}) => dispatch(initiateChill({chillerList, chillTime, chillLocation}))
   }
 }
 

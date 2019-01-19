@@ -13,20 +13,11 @@ import {
 } from 'react-native';
 import { WebBrowser } from 'expo';
 
-import { MonoText } from '../components/StyledText';
+import {postFBLogin} from '../redux/actions/authActions'
 
-const anon_user_vector="https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fimage.freepik.com%2Ffree-icon%2Fanonymous-avatar-information-button_318-32279.jpg"
 
-const chillerUsersMock = [
-  {image_url: anon_user_vector, name: "John David", userid: 1},
-  {image_url: anon_user_vector, name: "Sanjit Kalapatagod",userid: 2},
-  {image_url: anon_user_vector, name: "Pranav Pillai", userid: 3},
-]
-
-const nonChillerUsersMock = [
-  {image_url: anon_user_vector, name: "Other guy", userid: 1},
-  {image_url: anon_user_vector, name: "Other gal", userid: 2},
-]
+import {chillerUsersMock , nonChillerUsersMock} from '../mocks/index'
+import axios from 'axios';
 
 async function logIn() {
   try {
@@ -43,6 +34,9 @@ async function logIn() {
       // Get the user's name using Facebook's Graph API
       const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
       Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
+
+      postFBLogin({access_token: token, permissions, expires, declinedPermissions})
+
     } else {
       // type === 'cancel'
     }
@@ -70,11 +64,15 @@ export default class HomeScreen extends React.Component {
               onPress={() => navigate('ActivityLauncher')}
               title="Tryna Chill?"
             />
+            <Button
+              onPress={() => navigate('ActivityLauncher')}
+              title="Tryna Eat?"
+            />
           </View>
           <SectionList style={styles.chillersContainer}
             sections={[
-              {title: 'Homies', data: chillerUsersMock},
-              {title: 'All', data: nonChillerUsersMock},
+              {title: 'Requesting you', data: chillerUsersMock},
+              {title: 'Your chills', data: nonChillerUsersMock},
             ]}
             renderItem={({item}) => <Text style={styles.item}>{item.name}</Text>}
             renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}

@@ -1,10 +1,13 @@
 import types from './types';
 import axios from 'axios';
 
-const API_SERVER_BASE_URL='http://localhost:3000/api'
+import {API_SERVER_BASE_URL} from '../../constants/APIConstants'
 
 const {
-  TOGGLE_CHILLER_SELECT
+  TOGGLE_CHILLER_SELECT,
+  CHILL_FAILURE,
+  CHILL_SUCCESS,
+  CHILL_REQUESTED,
 } = types;
 
 const CHILL_ACTIVITY_TYPE = 'CH';
@@ -23,16 +26,29 @@ export function toggleChillerSelection (userid) {
   }
 }
 
-export function initiateChill (userids) {
+export function initiateChill ({chillerList, chillTime, chillLocation}) {
+  const userids = chillerList;
   return dispatch => {
+    dispatch({type: CHILL_REQUESTED})
     axios.post(`${API_SERVER_BASE_URL}/create_activity`, {
       userids,
       activity_type: CHILL_ACTIVITY_TYPE,
+      activity_time: chillTime,
+      activity_location: chillLocation,
     })
     .then(({data})=> {
-      console.log(data)
+      dispatch({
+        type: CHILL_SUCCESS
+
+      })
     })  
-    .catch(err => console.log(err))
+    .catch(error => {
+      console.log(error)
+      dispatch({
+        type: CHILL_FAILURE,
+        error
+      })
+    })
   }
 }
 
