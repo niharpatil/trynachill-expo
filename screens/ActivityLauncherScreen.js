@@ -7,6 +7,7 @@ import {
   Button,
   SectionList,
   TextInput,
+  Alert,
 } from 'react-native';
 import { CheckBox, FormInput } from 'react-native-elements'
 import { connect } from 'react-redux'

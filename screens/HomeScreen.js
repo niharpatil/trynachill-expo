@@ -11,9 +11,11 @@ import {
   Alert,
   SectionList,
 } from 'react-native';
+import {connect} from 'react-redux'
 import { WebBrowser } from 'expo';
 
 import {postFBLogin} from '../redux/actions/authActions'
+import {initializeChillerUsers} from '../redux/actions/activityActions'
 
 
 import {chillerUsersMock , nonChillerUsersMock} from '../mocks/index'
@@ -45,10 +47,12 @@ async function logIn() {
   }
 }
 
-export default class HomeScreen extends React.Component {
+class HomeScreen extends React.Component {
   constructor(props){
     super(props)
     logIn()
+    const {initializeChillerUsers} = this.props;
+    initializeChillerUsers()
   }
   static navigationOptions = {
     header: null,
@@ -60,10 +64,6 @@ export default class HomeScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.container} contentContainerStyle={styles.contentContainer}>
           <View style={styles.welcomeContainer}>
-            <Button
-              onPress={() => navigate('ActivityLauncher')}
-              title="Tryna Chill?"
-            />
             <Button
               onPress={() => navigate('ActivityLauncher')}
               title="Tryna Eat?"
@@ -83,6 +83,14 @@ export default class HomeScreen extends React.Component {
     );
   }
 }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    initializeChillerUsers: () => dispatch(initializeChillerUsers())
+  }
+}
+
+export default connect(null, mapDispatchToProps)(HomeScreen)
 
 const styles = StyleSheet.create({
   // Custom styles
