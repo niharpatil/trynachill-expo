@@ -12,6 +12,7 @@ import {
 import { CheckBox, FormInput } from 'react-native-elements'
 import { connect } from 'react-redux'
 import DateTimePicker from 'react-native-modal-datetime-picker'
+import _ from 'lodash'
 
 import { toggleChillerSelection, initiateChill } from '../redux/actions/activityActions';
 
@@ -88,7 +89,7 @@ class ActivityLauncherScreen extends React.Component {
     } = this.props;
     let chillerList = this._chillersObjectToList(chillerUsers)
     chillerList = chillerList.filter(item => item.selected)
-    chillerList = chillerList.map(item => item.userid)
+    chillerList = chillerList.map(item => _.pick(item, ['firstName', 'lastName', 'cellNumber']))
     const {
       chillLocation,
       chillTime

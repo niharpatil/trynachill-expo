@@ -46,11 +46,11 @@ export function toggleChillerSelection (userid) {
 }
 
 export function initiateChill ({chillerList, chillTime, chillLocation}) {
-  const userids = chillerList;
+  const users = chillerList;
   return dispatch => {
     dispatch({type: CHILL_REQUESTED})
     axios.post(`${API_SERVER_BASE_URL}/create_activity`, {
-      userids,
+      users,
       activity_type: EAT_ACTIVITY_TYPE,
       activity_time: chillTime,
       activity_location: chillLocation,
