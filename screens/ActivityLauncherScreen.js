@@ -16,6 +16,10 @@ import _ from 'lodash'
 
 import { toggleChillerSelection, initiateChill } from '../redux/actions/activityActions';
 
+import {
+  CHILL_STATUS_PENDING,
+} from '../constants/AppConstants';
+
 class ActivityLauncherScreen extends React.Component {
   state = {
     isDateTimePickerVisible: false,
@@ -23,17 +27,12 @@ class ActivityLauncherScreen extends React.Component {
     chillTime: null,
   }
 
-  static navigationOptions = {
-    title: 'ActivityLauncher',
-  };
-
   render() {
-    const { navigate } = this.props.navigation;
     const {
       chillerUsers
     } = this.props;
     const {
-      isDateTimePickerVisible
+      isDateTimePickerVisible,
     } = this.state;
     return (
       <View style={styles.container}>
@@ -60,7 +59,7 @@ class ActivityLauncherScreen extends React.Component {
             <DateTimePicker
               isVisible={this.state.isDateTimePickerVisible}
               onConfirm={this._handleTimePicked}
-              onCancel={() => this.setState({isDateTimePickerVisible: false})}
+              onCancel={() => this.setState({ isDateTimePickerVisible: false })}
               mode="time"
             />
             <Text>Where you tryna chill?</Text>
@@ -77,9 +76,15 @@ class ActivityLauncherScreen extends React.Component {
             title="Send chill request"
           />
         </View>
-
       </View>
     );
+  }
+
+  componentDidUpdate() {
+    const { navigate } = this.props.navigation;
+    if (this.props.chillRequestStatus === CHILL_STATUS_PENDING) {
+      navigate('ActivityLanding')
+    }
   }
 
   _launchChillRequest = () => {
@@ -102,7 +107,7 @@ class ActivityLauncherScreen extends React.Component {
     }
 
     // Send chill request to server
-    this.props.initiateChill({chillerList, chillTime, chillLocation})
+    this.props.initiateChill({ chillerList, chillTime, chillLocation })
   }
 
   _chillersObjectToList = (chillers) => {
@@ -134,14 +139,15 @@ class ActivityLauncherScreen extends React.Component {
 const mapStateToProps = (state) => {
   const { activity } = state;
   return {
-    chillerUsers: activity.chillerUsers
+    chillerUsers: activity.chillerUsers,
+    chillRequestStatus: activity.chillRequestStatus
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     toggleChillerSelection: userid => dispatch(toggleChillerSelection(userid)),
-    initiateChill: ({chillerList, chillTime, chillLocation}) => dispatch(initiateChill({chillerList, chillTime, chillLocation}))
+    initiateChill: ({ chillerList, chillTime, chillLocation }) => dispatch(initiateChill({ chillerList, chillTime, chillLocation }))
   }
 }
 

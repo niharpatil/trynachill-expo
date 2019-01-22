@@ -11,7 +11,10 @@ const {
   CHILL_REQUESTED,
   GET_CONTACTS_REQUESTED,
   GET_CONTACTS_FAILURE,
-  GET_CONTACTS_SUCCESS
+  GET_CONTACTS_SUCCESS,
+  GET_ACTIVITY_REQUESTED,
+  GET_ACTIVITY_SUCCESS,
+  GET_ACTIVITY_FAILURE,
 } = types;
 
 const CHILL_ACTIVITY_TYPE = 'CH';
@@ -55,10 +58,11 @@ export function initiateChill ({chillerList, chillTime, chillLocation}) {
       activity_time: chillTime,
       activity_location: chillLocation,
     })
-    .then(({data})=> {
+    .then( ({data}) => {
+      const activityId = data['activity_id']
       dispatch({
-        type: CHILL_SUCCESS
-
+        type: CHILL_SUCCESS,
+        activityId,
       })
     })  
     .catch(error => {
@@ -71,6 +75,25 @@ export function initiateChill ({chillerList, chillTime, chillLocation}) {
   }
 }
 
-export function getChillStatus (chillID) {
-  //TODO
+export function getActivityStatus (activityId) {
+  return dispatch => {
+    dispatch({type: GET_ACTIVITY_REQUESTED})
+    axios.post(`${API_SERVER_BASE_URL}/activity_status`, {
+      activity_id: activityId
+    })
+    .then( ({data}) => {
+      const activity = data;
+      dispatch({
+        type: GET_ACTIVITY_SUCCESS,
+        activity
+      })
+    })
+    .catch(error => {
+      console.log(error)
+      dispatch({
+        type: GET_ACTIVITY_FAILURE,
+        error
+      })
+    })
+  }
 }
