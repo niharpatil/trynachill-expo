@@ -36,6 +36,7 @@ export const activityReducer = (state=defaultState,action) => {
       return stateCopy
     case GET_CONTACTS_SUCCESS:
       let {contacts} = action;
+      contacts = contacts.filter(contact => contact.phoneNumbers)
       contacts = contacts.filter(contact => contact.phoneNumbers.some(pn => pn.label == 'mobile'))
       contacts = contacts.map(contact => ({...contact, phoneNumbers: contact.phoneNumbers.filter(pn => pn.label == 'mobile')}))
       contacts = contacts.map(contact => ({...contact, cellNumber: contact.phoneNumbers[0].number}))

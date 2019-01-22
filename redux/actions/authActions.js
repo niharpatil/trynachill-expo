@@ -7,4 +7,7 @@ export const postFBLogin = (fbUserData) => {
   .then(resp => {
     // TODO
   })
+  .catch(error => {
+    console.log(error)
+  })
 }

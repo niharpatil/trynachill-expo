@@ -23,17 +23,26 @@ const STUDY_ACTIVITY_TYPE = 'ST';
 
 
 export function initializeChillerUsers () {
-  return async dispatch => {
+  return dispatch => {
     dispatch({
       type: GET_CONTACTS_REQUESTED,
     }) 
 
-    const { data } = await Contacts.getContactsAsync({
+    Contacts.getContactsAsync({
       fields: [Contacts.Fields.Emails, Contacts.PHONE_NUMBERS],
-    }); 
-    dispatch({
-      type: GET_CONTACTS_SUCCESS,
-      contacts: data
+    })
+    .then(({data}) => {
+      dispatch({
+        type: GET_CONTACTS_SUCCESS,
+        contacts: data
+      })
+    })
+    .catch(error => {
+      console.log(error)
+      dispatch({
+        type: GET_ACTIVITY_FAILURE,
+        error
+      })
     })
   }
 }
